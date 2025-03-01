@@ -28,9 +28,21 @@ def getProposta():
     print("-" * 10 + " Info cliente " + "-" * 10)
     # ordine proposto
     ordineProposto = Slot()
+
+    # Lista orari validi
+    orari_validi = [ordini[i].getOrarioCliente() for i in range(n)]
+    print(orari_validi)
+    
     # orario
-    orario = datetime.strptime(input("Inserisci un orario: "), "%H:%M").time()
+    while True:
+        orario = datetime.strptime(input("Inserisci un orario (HH:MM): "), "%H:%M").time()
+        if orario in orari_validi:
+            break
+        else:
+            print("Orario non valido. Inserisci un orario tra quelli disponibili.")
+    
     ordineProposto.setOrarioCliente(orario)
+
     # consegna
     x = input("Consegna a casa? (s/n) ").strip().lower()  # Rimuove spazi e converte in minuscolo
     consegna = x == "s"  # True se l'utente scrive "s", False altrimenti

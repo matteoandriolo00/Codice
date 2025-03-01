@@ -31,6 +31,9 @@ class Slot:
     def setOrarioForno(self, new_orario_forno):
         self.orario_forno = new_orario_forno
 
+    def getOrarioCliente(self):
+        return self.orario_cliente
+
     def setIndirizzo(self, new_indirizzo):
         self.indirizzo = new_indirizzo
 
