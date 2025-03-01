@@ -4,9 +4,9 @@ class Slot:
     def __init__(self):
         self.pizze = 0
         self.pizzeFamiglia = 0
-        self.indirizzo = "non specificato"
-        self.orario_cliente = "non specificato"
-        self.orario_forno = "non specificato"
+        self.indirizzo = None 
+        self.orario_cliente = None
+        self.orario_forno = None
         self.orario_occupato = False
         self.consegna = False
 
