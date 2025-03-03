@@ -20,16 +20,28 @@ class Slot:
         else: print("Consegna: no")
 
     def setPizze(self,n):
-        self.pizze = n
+        if isinstance(n, int) and n >= 0:
+            self.pizze = n
+        else:
+            raise ValueError("Il numero di pizze deve essere un numero intero non negativo")
 
     def setPizzeFamiglia(self,n):
-        self.pizzeFamiglia = n
+        if isinstance(n, int) and n >= 0:
+            self.pizzeFamiglia = n
+        else:
+            raise ValueError("Il numero di pizze famiglia deve essere un numero intero non negativo")
 
     def setOrarioCliente(self, new_orario_cliente):
-        self.orario_cliente = new_orario_cliente
+        if isinstance(new_orario_cliente, time):
+            self.orario_cliente = new_orario_cliente
+        else:
+            raise ValueError("L'orario cliente deve essere un'istanza di datetime.time")
 
     def setOrarioForno(self, new_orario_forno):
-        self.orario_forno = new_orario_forno
+        if isinstance(new_orario_forno, time):
+            self.orario_forno = new_orario_forno
+        else:
+            raise ValueError("L'orario cliente deve essere un'istanza di datetime.time")
 
     def getOrarioCliente(self):
         return self.orario_cliente
