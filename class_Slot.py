@@ -7,7 +7,7 @@ class Slot:
         self.indirizzo = None 
         self.orario_cliente = None
         self.orario_forno = None
-        self.orario_occupato = False
+        self.disponibile = True 
         self.consegna = False
 
     def info(self):
@@ -21,13 +21,13 @@ class Slot:
 
     def setPizze(self,n):
         if isinstance(n, int) and n >= 0:
-            self.pizze = n
+            self.pizze = self.pizze + n # aggiunge il numero di pizze al totale
         else:
             raise ValueError("Il numero di pizze deve essere un numero intero non negativo")
 
     def setPizzeFamiglia(self,n):
         if isinstance(n, int) and n >= 0:
-            self.pizzeFamiglia = n
+            self.pizzeFamiglia = self.pizzeFamiglia + n # aggiunge il numero di pizze famiglia al totale
         else:
             raise ValueError("Il numero di pizze famiglia deve essere un numero intero non negativo")
 
@@ -76,6 +76,8 @@ class Slot:
             case _:
                 print("Non è stato possibile calcolare l'anticipo per il forno.")
 
-    def slot_disponibile(self):
-        total_pizze = self.pizze + (self.pizzeFamiglia * 2)
-        if total_pizze >= 7: self.orario_occupato = True
+    def slot_disponibile(self, other_slot):
+        total_pizze = self.pizze + (self.pizzeFamiglia * 2) + other_slot.pizze + (other_slot.pizzeFamiglia * 2)
+        if total_pizze > 9: 
+            self.disponibile = False # se il numero di pizze supera 9, non è possibile usare questo slot orario
+        return self.disponibile

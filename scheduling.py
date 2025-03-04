@@ -80,3 +80,5 @@ def getProposta():
     return ordineProposto
 
 ordine1 = getProposta().info()
+
+#def assegna_slot(ordine):
