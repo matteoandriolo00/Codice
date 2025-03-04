@@ -12,16 +12,22 @@ vie = pd.read_csv(csv_path, sep=",")
 
 n=70 # numero slot orari
 
+max_pizze = int(input("Inserisci il numero massimo di pizze che si può gestire ogni 5 minuti: "))
+
 ordini = [Slot() for i in range(n)]
 
-# impostazione orari slot
+# impostazione orari e max_pizze slot
 ora_inizio = time(17,00)
 ordini[0].setOrarioCliente(ora_inizio)
+ordini[0].set_max_pizze(max_pizze)
 start, end = 1, n
 curr = ora_inizio
 for i in range(start, end):
     curr = (datetime.combine(datetime.today(), curr) + timedelta(hours=0, minutes=5)).time()
     ordini[i].setOrarioCliente(curr)
+    ordini[i].set_max_pizze(max_pizze)
+
+
 
 def getProposta():
     print("-" * 10 + " Info cliente " + "-" * 10)
@@ -51,7 +57,7 @@ def getProposta():
     if consegna:
         ordineProposto.setConsegna()
         indirizzo = input("Inserire indirizzo: ")
-        ordineProposto.setIndirizzo(indirizzo)
+        ordineProposto.setLuogo(indirizzo)
     # pizze
     while True:
         try:

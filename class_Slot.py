@@ -4,11 +4,16 @@ class Slot:
     def __init__(self):
         self.pizze = 0
         self.pizzeFamiglia = 0
-        self.indirizzo = None 
+        self.indirizzo1 = None 
+        self.indirizzo2 = None
+        self.indirizzo3 = None
         self.orario_cliente = None
         self.orario_forno = None
         self.disponibile = True 
         self.consegna = False
+
+    def set_max_pizze(self, max_pizze):
+        self.max_pizze = max_pizze 
 
     def info(self):
         print(f"Pizze: {self.pizze}\nPizze famiglia: {self.pizzeFamiglia}")
@@ -46,8 +51,15 @@ class Slot:
     def getOrarioCliente(self):
         return self.orario_cliente
 
-    def setIndirizzo(self, new_indirizzo):
-        self.indirizzo = new_indirizzo
+    def setLuogo(self, new_indirizzo):
+        if self.indirizzo1 is None:
+            self.indirizzo1 = new_indirizzo
+        elif self.indirizzo2 is None:
+            self.indirizzo2 = new_indirizzo
+        elif self.indirizzo3 is None:
+            self.indirizzo3 = new_indirizzo
+        else:
+            raise ValueError("Tutti gli indirizzi sono già impostati")
 
     def hasFamily(self):
         if self.pizzeFamiglia > 0:
@@ -78,6 +90,6 @@ class Slot:
 
     def slot_disponibile(self, other_slot):
         total_pizze = self.pizze + (self.pizzeFamiglia * 2) + other_slot.pizze + (other_slot.pizzeFamiglia * 2)
-        if total_pizze > 9: 
+        if total_pizze > self.max_pizze: 
             self.disponibile = False # se il numero di pizze supera 9, non è possibile usare questo slot orario
         return self.disponibile
