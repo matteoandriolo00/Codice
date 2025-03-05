@@ -2,7 +2,9 @@ from datetime import time, timedelta, datetime
 from class_Slot import Slot
 from geopy import distance
 import pandas as pd
+import difflib
 import os
+import re
 
 # percorso cartella csv anche se cambio pc
 csv_dir = os.path.dirname(os.path.realpath(__file__))
@@ -27,6 +29,38 @@ for i in range(start, end):
     ordini[i].setOrarioCliente(curr)
     ordini[i].set_max_pizze(max_pizze)
 
+def clean_text(text):
+    """
+    Pulisce la stringa mantenendo solo caratteri alfabetici e spazi,
+    convertendo tutto in minuscolo.
+    """
+    return re.sub(r'[^a-zA-Z\s]', '', text).lower()
+
+def find_most_similar_index(df, column, query):
+    """
+    Restituisce l'indice della riga nella colonna specificata in df che più
+    assomiglia alla query, ignorando differenze tra maiuscole e minuscole.
+    
+    Parametri:
+      - df: DataFrame contenente il dataset.
+      - column: nome della colonna in cui cercare.
+      - query: stringa da confrontare.
+    
+    Restituisce:
+      - best_index: l'indice della riga con il punteggio di similarità più alto.
+    """
+    cleaned_query = clean_text(query)
+    best_score = 0
+    best_index = None
+
+    for idx, row in df.iterrows():
+        cleaned_value = clean_text(str(row[column]))
+        score = difflib.SequenceMatcher(None, cleaned_query, cleaned_value).ratio()
+        if score > best_score:
+            best_score = score
+            best_index = idx
+
+    return best_index
 
 
 def getProposta():
@@ -85,6 +119,8 @@ def getProposta():
     print("-" * 10 + " Proposta cliente " + "-" * 10)
     return ordineProposto
 
-ordine1 = getProposta().info()
+# funzione da scrivere 
+def assegna_slot(ordine):
+    return 0
 
-#def assegna_slot(ordine):
+ordine_cliente = getProposta().info()

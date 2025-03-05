@@ -20,8 +20,9 @@ class Slot:
         print(f"Orario cliente: {self.orario_cliente}")
         print(f"Orario forno: {self.orario_forno}")
         if self.isConsegna(): 
-            print("Consegna: sì")
-            print(f"Indirizzo: {self.indirizzo}")
+            if self.indirizzo2 is None: print(f"Consegna: {self.indirizzo1}")
+            elif self.indirizzo3 is None: print(f"Consegne: {self.indirizzo1}, {self.indirizzo2}")
+            else: print(f"Consegne: {self.indirizzo1}, {self.indirizzo2}, {self.indirizzo3}")
         else: print("Consegna: no")
 
     def setPizze(self,n):
