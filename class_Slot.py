@@ -31,6 +31,12 @@ class Slot:
         else:
             raise ValueError("Il numero di pizze deve essere un numero intero non negativo")
 
+    def getPizze(self):
+        return self.pizze
+    
+    def getPizzeFamiglia(self):
+        return self.pizzeFamiglia
+
     def setPizzeFamiglia(self,n):
         if isinstance(n, int) and n >= 0:
             self.pizzeFamiglia = self.pizzeFamiglia + n # aggiunge il numero di pizze famiglia al totale
@@ -51,6 +57,9 @@ class Slot:
 
     def getOrarioCliente(self):
         return self.orario_cliente
+    
+    def getOrarioForno(self):
+        return self.orario_forno
 
     def setLuogo(self, new_indirizzo):
         if self.indirizzo1 is None:
@@ -61,6 +70,9 @@ class Slot:
             self.indirizzo3 = new_indirizzo
         else:
             raise ValueError("Tutti gli indirizzi sono già impostati")
+
+    def getLuogo(self):
+        return self.indirizzo1 # basta solo il primo perché questo metodo viene invocato solo durante la proposta cliente
 
     def hasFamily(self):
         if self.pizzeFamiglia > 0:

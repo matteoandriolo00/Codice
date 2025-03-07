@@ -16,18 +16,20 @@ n=70 # numero slot orari
 
 max_pizze = int(input("Inserisci il numero massimo di pizze che si può gestire ogni 5 minuti: "))
 
-ordini = [Slot() for i in range(n)]
+slot_array = [Slot() for i in range(n)]
 
 # impostazione orari e max_pizze slot
 ora_inizio = time(17,00)
-ordini[0].setOrarioCliente(ora_inizio)
-ordini[0].set_max_pizze(max_pizze)
+slot_array[0].setOrarioForno(ora_inizio)
+slot_array[0].setOrarioCliente(ora_inizio)
+slot_array[0].set_max_pizze(max_pizze)
 start, end = 1, n
 curr = ora_inizio
 for i in range(start, end):
     curr = (datetime.combine(datetime.today(), curr) + timedelta(hours=0, minutes=5)).time()
-    ordini[i].setOrarioCliente(curr)
-    ordini[i].set_max_pizze(max_pizze)
+    slot_array[i].setOrarioForno(curr)
+    slot_array[i].setOrarioCliente(curr)
+    slot_array[i].set_max_pizze(max_pizze)
 
 def clean_text(text):
     """
@@ -62,13 +64,12 @@ def find_most_similar_index(df, column, query):
 
     return best_index
 
-
 def getProposta():
     print("-" * 10 + " Info cliente " + "-" * 10)
     # ordine proposto
     ordineProposto = Slot()
     # Lista orari validi
-    orari_validi = [ordini[i].getOrarioCliente() for i in range(n)] 
+    orari_validi = [slot_array[i].getOrarioForno() for i in range(n)] 
     # orario
     while True:
         try:
@@ -91,7 +92,8 @@ def getProposta():
     if consegna:
         ordineProposto.setConsegna()
         indirizzo = input("Inserire indirizzo: ")
-        ordineProposto.setLuogo(indirizzo)
+        via_ind = vie.loc[find_most_similar_index(vie, "Indirizzo", indirizzo), ["Indirizzo"]]
+        ordineProposto.setLuogo(via_ind.iloc[0]) # setta la via senza avere le info sul contenuto dell'oggetto
     # pizze
     while True:
         try:
@@ -116,11 +118,28 @@ def getProposta():
     ordineProposto.setPizzeFamiglia(pizzeFam)
     # calcolo orario forno
     ordineProposto.calcolo_anticipo_forno()
-    print("-" * 10 + " Proposta cliente " + "-" * 10)
     return ordineProposto
 
-# funzione da scrivere 
-def assegna_slot(ordine):
-    return 0
+# funzione definita solo per il caso base in cui non c'è altro, fare tutti gli altri casi possibili
+def assegna_slot(ordine: Slot):
+    for i in range(n):
+        if ordine.getOrarioForno() == slot_array[i].getOrarioForno():
+            if slot_array[i].slot_disponibile(ordine):
+                slot_array[i].setPizze(ordine.getPizze())
+                slot_array[i].setPizzeFamiglia(ordine.getPizzeFamiglia())
+                if ordine.isConsegna():
+                    # impostare indirizzo sull'orario richiesto dal cliente 
+                    for j in range(n):
+                        if ordine.getOrarioCliente() == slot_array[j].getOrarioCliente():
+                            slot_array[j].setConsegna()
+                            slot_array[j].setLuogo(ordine.getLuogo())
 
-ordine_cliente = getProposta().info()
+ordine_cliente = getProposta()
+print("-" * 10 + " Proposta cliente " + "-" * 10)
+ordine_cliente.info()
+print("-" * 10 + "------------------" + "-" * 10)
+
+assegna_slot(ordine_cliente)
+
+for i in range(n):
+    slot_array[i].info()
