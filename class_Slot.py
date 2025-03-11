@@ -11,19 +11,21 @@ class Slot:
         self.orario_forno = None
         self.disponibile = True 
         self.consegna = False
+        self.anticipo_forno = 0
 
     def set_max_pizze(self, max_pizze):
         self.max_pizze = max_pizze 
 
     def info(self):
-        print(f"Pizze: {self.pizze}\nPizze famiglia: {self.pizzeFamiglia}")
-        print(f"Orario cliente: {self.orario_cliente}")
+        # orario cliente e forno coincidono per lo stesso slot
         print(f"Orario forno: {self.orario_forno}")
-        if self.isConsegna(): 
-            if self.indirizzo2 is None: print(f"Consegna: {self.indirizzo1}")
-            elif self.indirizzo3 is None: print(f"Consegne: {self.indirizzo1}, {self.indirizzo2}")
-            else: print(f"Consegne: {self.indirizzo1}, {self.indirizzo2}, {self.indirizzo3}")
-        else: print("Consegna: no")
+        print(f"Pizze: {self.pizze}\nPizze famiglia: {self.pizzeFamiglia}")
+        if self.isConsegna():
+            print(f"Consegna/e a casa per le: {(datetime.combine(datetime.today(), self.orario_forno) + timedelta(minutes=self.getAnticipoForno())).time()}")
+            if self.indirizzo2 is None: print(f"Dove: {self.indirizzo1}")
+            elif self.indirizzo3 is None: print(f"Dove: {self.indirizzo1}, {self.indirizzo2}")
+            else: print(f"Dove: {self.indirizzo1}, {self.indirizzo2}, {self.indirizzo3}")
+        else: print("Consegne: no")
 
     def setPizze(self,n):
         if isinstance(n, int) and n >= 0:
@@ -85,21 +87,32 @@ class Slot:
         return self.consegna
         
     def calcolo_anticipo_forno(self):
-        match self.orario_cliente:
-            case t if datetime.strptime("18:00", "%H:%M").time() <= self.orario_cliente < datetime.strptime("19:15", "%H:%M").time():
-                self.orario_forno = (datetime.combine(datetime.today(), self.orario_cliente) - timedelta(hours=0, minutes=10)).time()
-                if self.hasFamily(): self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(hours=0, minutes=5)).time()
-                if self.isConsegna(): self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(hours=0, minutes=15)).time()
-            case t if datetime.strptime("19:15", "%H:%M").time() <= self.orario_cliente < datetime.strptime("20:00", "%H:%M").time():
-                self.orario_forno = (datetime.combine(datetime.today(), self.orario_cliente) - timedelta(hours=0, minutes=15)).time()
-                if self.hasFamily(): self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(hours=0, minutes=5)).time()
-                if self.isConsegna(): self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(hours=0, minutes=15)).time()
-            case t if datetime.strptime("20:00", "%H:%M").time() <= self.orario_cliente:
-                self.orario_forno = (datetime.combine(datetime.today(), self.orario_cliente) - timedelta(hours=0, minutes=20)).time()
-                if self.hasFamily(): self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(hours=0, minutes=5)).time()
-                if self.isConsegna(): self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(hours=0, minutes=15)).time()
-            case _:
-                print("Non è stato possibile calcolare l'anticipo per il forno.")
+        
+        intervalli = [
+            (datetime.strptime("18:00", "%H:%M").time(), datetime.strptime("19:15", "%H:%M").time(), 10),
+            (datetime.strptime("19:15", "%H:%M").time(), datetime.strptime("20:00", "%H:%M").time(), 15),
+            (datetime.strptime("20:00", "%H:%M").time(), None, 20)  # Nessun limite superiore
+        ]
+
+        self.anticipo_forno = next((anticipo for inizio, fine, anticipo in intervalli 
+                                    if inizio <= self.orario_cliente and (fine is None or self.orario_cliente < fine)), None)
+
+        if self.anticipo_forno is None:
+            print("Non è stato possibile calcolare l'anticipo per il forno.")
+            return
+
+        self.orario_forno = (datetime.combine(datetime.today(), self.orario_cliente) - timedelta(minutes=self.anticipo_forno)).time()
+
+        if self.hasFamily():
+            self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(minutes=5)).time()
+            self.anticipo_forno += 5
+
+        if self.isConsegna():
+            self.orario_forno = (datetime.combine(datetime.today(), self.orario_forno) - timedelta(minutes=15)).time()
+            self.anticipo_forno += 15
+
+    def getAnticipoForno(self):
+        return self.anticipo_forno
 
     def slot_disponibile(self, other_slot):
         total_pizze = self.pizze + (self.pizzeFamiglia * 2) + other_slot.pizze + (other_slot.pizzeFamiglia * 2)

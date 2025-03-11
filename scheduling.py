@@ -31,6 +31,9 @@ for i in range(start, end):
     slot_array[i].setOrarioCliente(curr)
     slot_array[i].set_max_pizze(max_pizze)
 
+# orari validi
+orari_validi = [slot_array[i].getOrarioForno() for i in range(n)]
+
 def clean_text(text):
     """
     Pulisce la stringa mantenendo solo caratteri alfabetici e spazi,
@@ -67,9 +70,7 @@ def find_most_similar_index(df, column, query):
 def getProposta():
     print("-" * 10 + " Info cliente " + "-" * 10)
     # ordine proposto
-    ordineProposto = Slot()
-    # Lista orari validi
-    orari_validi = [slot_array[i].getOrarioForno() for i in range(n)] 
+    ordineProposto = Slot() 
     # orario
     while True:
         try:
@@ -120,26 +121,50 @@ def getProposta():
     ordineProposto.calcolo_anticipo_forno()
     return ordineProposto
 
-# funzione definita solo per il caso base in cui non c'è altro, fare tutti gli altri casi possibili
 def assegna_slot(ordine: Slot):
+    index = 0
     for i in range(n):
         if ordine.getOrarioForno() == slot_array[i].getOrarioForno():
+            index = i
             if slot_array[i].slot_disponibile(ordine):
                 slot_array[i].setPizze(ordine.getPizze())
                 slot_array[i].setPizzeFamiglia(ordine.getPizzeFamiglia())
                 if ordine.isConsegna():
-                    # impostare indirizzo sull'orario richiesto dal cliente 
-                    for j in range(n):
-                        if ordine.getOrarioCliente() == slot_array[j].getOrarioCliente():
-                            slot_array[j].setConsegna()
-                            slot_array[j].setLuogo(ordine.getLuogo())
+                    slot_array[i].setConsegna()
+                    slot_array[i].setLuogo(ordine.getLuogo())                
+            else: # se l'orario non è disponibile
+                print("\nOrari disponibili da proporre al cliente:")
+                anticipo = ordine.getAnticipoForno()
+                for k in range(index+1, index+7):
+                    if slot_array[k].slot_disponibile(ordine):
+                        orario = (datetime.combine(datetime.today(), slot_array[k].getOrarioCliente()) + timedelta(hours=0, minutes=anticipo)).time()
+                        print(orario)
+                print("\n")
+                while True:
+                    x = input("Reimpostare l'ordine? (s/n) ").strip().lower()  # Rimuove spazi e converte in minuscolo
+                    if x in ["s", "n"]:
+                        break
+                    else:
+                        print("Input non valido. Inserisci 's' per sì o 'n' per no.")
+                reimpostare = x == "s"  # True se l'utente scrive "s", False altrimenti
+                if reimpostare:
+                    nuovo_ordine = getProposta()
+                    assegna_slot(nuovo_ordine)
 
+# istanza d'esempio
 ordine_cliente = getProposta()
-print("-" * 10 + " Proposta cliente " + "-" * 10)
-ordine_cliente.info()
-print("-" * 10 + "------------------" + "-" * 10)
+#print("-" * 10 + " Proposta cliente " + "-" * 10)
+#ordine_cliente.info()
+
+ordine_cliente2 = getProposta()
+#print("-" * 10 + " Proposta cliente 2 " + "-" * 10)
+#ordine_cliente2.info()
 
 assegna_slot(ordine_cliente)
+assegna_slot(ordine_cliente2)
 
+# stampa per verifica assegnamento
 for i in range(n):
-    slot_array[i].info()
+    if slot_array[i].getPizze() > 0 or slot_array[i].getPizzeFamiglia() > 0 or slot_array[i].isConsegna():
+        print("-" * 25)
+        slot_array[i].info()
