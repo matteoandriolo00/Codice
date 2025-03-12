@@ -133,7 +133,7 @@ def assegna_slot(ordine: Slot):
                     slot_array[i].setConsegna()
                     slot_array[i].setLuogo(ordine.getLuogo())                
             else: # se l'orario non è disponibile
-                print("\nOrari disponibili da proporre al cliente:")
+                print(f"\n{ordine.getOrarioCliente()} non disponibile.\nOrari disponibili:")
                 anticipo = ordine.getAnticipoForno()
                 for k in range(index+1, index+7):
                     if slot_array[k].slot_disponibile(ordine):
@@ -146,25 +146,51 @@ def assegna_slot(ordine: Slot):
                         break
                     else:
                         print("Input non valido. Inserisci 's' per sì o 'n' per no.")
+                        print("\n")
                 reimpostare = x == "s"  # True se l'utente scrive "s", False altrimenti
                 if reimpostare:
                     nuovo_ordine = getProposta()
                     assegna_slot(nuovo_ordine)
 
-# istanza d'esempio
-ordine_cliente = getProposta()
-#print("-" * 10 + " Proposta cliente " + "-" * 10)
-#ordine_cliente.info()
+soglia_pausa = 24
 
-ordine_cliente2 = getProposta()
-#print("-" * 10 + " Proposta cliente 2 " + "-" * 10)
-#ordine_cliente2.info()
+def aggiungi_pausa():
+    slot_index = 0
+    while slot_index < len(slot_array):
+            
+        # a ogni set di 4 slot CONSECUTIVI, i contatori vengono resettati
+        total_pizze = 0
+        slot_count = 0
 
-assegna_slot(ordine_cliente)
-assegna_slot(ordine_cliente2)
+        # se sono in questa condizione posso cominciare a contare da questo indice
+        if (slot_array[slot_index].getPizze() > 0 or slot_array[slot_index].getPizzeFamiglia() > 0) and not slot_array[slot_index].isPausa():
+            
+            # ciclo per contare le pizze in 4 slot consecutivi
+            while (slot_count <= 4):
+
+                slot_count += 1
+                total_pizze += slot_array[slot_index].getPizze() + (2*slot_array[slot_index].getPizzeFamiglia())
+                slot_index += 1 # all'ultima iterazione slot_index è già allo slot successivo al quarto
+            
+            if total_pizze >= soglia_pausa:
+                pausa_index = slot_index
+                if pausa_index < len(slot_array):
+                    slot_array[pausa_index].setPausa()
+                    # ora che la pausa è stata impostata nello slot giusto si può avanzare con l'indice
+                    slot_index += 1
+
+        # se nello slot letto non c'è niente si passa al successivo
+        else: slot_index += 1
+                        
+
+# istanze di prova
+for i in range(4):
+    ordine_cliente = getProposta()
+    assegna_slot(ordine_cliente)
+    aggiungi_pausa()
 
 # stampa per verifica assegnamento
 for i in range(n):
-    if slot_array[i].getPizze() > 0 or slot_array[i].getPizzeFamiglia() > 0 or slot_array[i].isConsegna():
+    if slot_array[i].getPizze() > 0 or slot_array[i].getPizzeFamiglia() > 0 or slot_array[i].isConsegna() or slot_array[i].isPausa():
         print("-" * 25)
         slot_array[i].info()

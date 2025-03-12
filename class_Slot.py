@@ -12,16 +12,20 @@ class Slot:
         self.disponibile = True 
         self.consegna = False
         self.anticipo_forno = 0
+        self.pausa = False
 
     def set_max_pizze(self, max_pizze):
         self.max_pizze = max_pizze 
 
     def info(self):
+        if self.pausa:
+            print("Pausa")
+            return
         # orario cliente e forno coincidono per lo stesso slot
         print(f"Orario forno: {self.orario_forno}")
         print(f"Pizze: {self.pizze}\nPizze famiglia: {self.pizzeFamiglia}")
         if self.isConsegna():
-            print(f"Consegna/e a casa per le: {(datetime.combine(datetime.today(), self.orario_forno) + timedelta(minutes=self.getAnticipoForno())).time()}")
+            print(f"Consegna/e a casa per le: {self.orario_cliente}")
             if self.indirizzo2 is None: print(f"Dove: {self.indirizzo1}")
             elif self.indirizzo3 is None: print(f"Dove: {self.indirizzo1}, {self.indirizzo2}")
             else: print(f"Dove: {self.indirizzo1}, {self.indirizzo2}, {self.indirizzo3}")
@@ -32,6 +36,13 @@ class Slot:
             self.pizze = self.pizze + n # aggiunge il numero di pizze al totale
         else:
             raise ValueError("Il numero di pizze deve essere un numero intero non negativo")
+
+    def isPausa(self):
+        return self.pausa
+    
+    def setPausa(self):
+        self.pausa = True
+        self.disponibile = False
 
     def getPizze(self):
         return self.pizze
